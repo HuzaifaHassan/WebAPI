@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using System.Data;
 using WebAPI.Models;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace WebAPI.Controllers
 {
@@ -15,11 +17,13 @@ namespace WebAPI.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        public readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;   
 
-        public EmployeeController(IConfiguration configuration)
+        public EmployeeController(IConfiguration configuration,IWebHostEnvironment env)
         {
             _configuration = configuration;
+            _env = env;
 
         }
         [HttpGet]
@@ -52,9 +56,9 @@ namespace WebAPI.Controllers
         public JsonResult Post(Employee emp)
         {
             string query = @"insert into dbo.Employee(EmployeeName,Department,DateOfJoining,PhotoFileName) values ('" + emp.EmployeeName + @"'
-                                                                '"+emp.Department+@"'
-                                                                '"+emp.DateOfJoining+@"'
-                                                                 '"+emp.PhotoFileName+@"')";
+                                                                '" + emp.Department + @"'
+                                                                '" + emp.DateOfJoining + @"'
+                                                                 '" + emp.PhotoFileName + @"')";
             DataTable table = new DataTable();
             string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
             SqlDataReader myReader;
@@ -76,10 +80,10 @@ namespace WebAPI.Controllers
 
         public JsonResult Put(Employee emp)
         {
-            string query = @"update dbo.Employee set EmployeeName ='"+emp.EmployeeName+@"'
-                            ,Department = '"+emp.Department+@"'
-                            ,DateOfJoining ='"+emp.DateOfJoining+@"'
-                            ,where EmployeeId="+emp.EmployeeId+@"
+            string query = @"update dbo.Employee set EmployeeName ='" + emp.EmployeeName + @"'
+                            ,Department = '" + emp.Department + @"'
+                            ,DateOfJoining ='" + emp.DateOfJoining + @"'
+                            ,where EmployeeId=" + emp.EmployeeId + @"
                             ";
             DataTable table = new DataTable();
             string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
@@ -119,6 +123,34 @@ namespace WebAPI.Controllers
 
             }
             return new JsonResult("Successfully updated");
+        }
+        [Route("SaveFile")]
+        [HttpPost]
+        public JsonResult SaveFile()
+        {
+            try
+            {
+                var httpRequest = Request.Form;
+                var postedFile = httpRequest.Files[0];
+                string filename = postedFile.FileName;
+                var physicalPath = _env.ContentRootPath + "/Photos/" + filename;
+                using (var stream = new FileStream(physicalPath, FileMode.Create))
+                {
+
+                    postedFile.CopyTo(stream);
+                
+                }
+                return new JsonResult(filename);
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+
+
+
         }
     }
 }
