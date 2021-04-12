@@ -49,9 +49,12 @@ namespace WebAPI.Controllers
 
         [HttpPost]
 
-        public JsonResult Post(Department dep)
+        public JsonResult Post(Employee emp)
         {
-            string query = @"insert into dbo.Department values ('" + dep.DepartmentName + @"')";
+            string query = @"insert into dbo.Employee(EmployeeName,Department,DateOfJoining,PhotoFileName) values ('" + emp.EmployeeName + @"'
+                                                                '"+emp.Department+@"'
+                                                                '"+emp.DateOfJoining+@"'
+                                                                 '"+emp.PhotoFileName+@"')";
             DataTable table = new DataTable();
             string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
             SqlDataReader myReader;
@@ -71,10 +74,13 @@ namespace WebAPI.Controllers
         }
         [HttpPut]
 
-        public JsonResult Put(Department dep)
+        public JsonResult Put(Employee emp)
         {
-            string query = @"update dbp.Department set DepartmentName='" + dep.DepartmentName + @"'
-                              where DepartmentId=" + dep.DepartmentId + @"";
+            string query = @"update dbo.Employee set EmployeeName ='"+emp.EmployeeName+@"'
+                            ,Department = '"+emp.Department+@"'
+                            ,DateOfJoining ='"+emp.DateOfJoining+@"'
+                            ,where EmployeeId="+emp.EmployeeId+@"
+                            ";
             DataTable table = new DataTable();
             string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
             SqlDataReader myReader;
@@ -96,7 +102,7 @@ namespace WebAPI.Controllers
 
         public JsonResult Delete(int id)
         {
-            string query = @"delete from  dbp.Department where DepartmentId=" + id + @"";
+            string query = @"delete from  dbp.Employee where EmployeeId=" + id + @"";
             DataTable table = new DataTable();
             string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
             SqlDataReader myReader;
